@@ -1,0 +1,613 @@
+<html>
+
+<head>
+    <title>My Tetris</title>
+    <style>
+        h1 {
+            color: skyblue;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        body {
+            background-color: black;
+        }
+
+        #tetris {
+            width: 200px;
+            height: 400px;
+        }
+
+        #hold {
+            width: 80px;
+            height: 80px;
+        }
+
+        #next {
+            width: 80px;
+            height: 400px;
+        }
+
+        td {
+            background-color: lightGray;
+            border: 1px dotted;
+            width: 20px;
+            height: 20px;
+        }
+
+        .stage {
+            border: solid 1px;
+            background-color: black;
+        }
+
+        .hold {
+            border: solid 1px;
+            background-color: black;
+        }
+
+        .next {
+            border: solid 1px;
+            background-color: black;
+        }
+
+        .contents {
+            display: flex;
+        }
+
+        .btn-real {
+            display: inline-block;
+            text-decoration: none;
+            color: cyan;
+            /*アイコン色*/
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            font-size: 32px;
+            border-radius: 50%;
+            text-align: center;
+            padding: 0px;
+            border: 0px;
+            overflow: hidden;
+        }
+
+        .btn-real i {
+            line-height: 40px;
+        }
+
+        .btn-real:active {
+            /*押したとき*/
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 2px rgba(0, 0, 0, 0.19);
+            border-bottom: none;
+        }
+    </style>
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+    <script>
+        let orenoTurn = true;
+        let timer;
+        const screen = [
+            //0 1  2  3  4  5  6  7  8  9
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+        const hold = [
+            //0 1  2  3
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
+        const next = [
+            //0 1  2  3
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
+
+
+        let zmino = {
+            color: 1,
+            pos: [
+                [0, 0],
+                [0, 1],
+                [1, 1],
+                [1, 2]
+            ]
+        };
+        let smino = {
+            color: 2,
+            pos: [
+                [0, 1],
+                [0, 2],
+                [1, 0],
+                [1, 1]
+            ]
+        };
+        let lmino = {
+            color: 3,
+            pos: [
+                [0, 0],
+                [0, 1],
+                [0, 2],
+                [1, 2]
+            ]
+        };
+        let jmino = {
+            color: 4,
+            pos: [
+                [0, 0],
+                [0, 1],
+                [0, 2],
+                [1, 0]
+            ]
+        };
+        let omino = {
+            color: 5,
+            pos: [
+                [0, 1],
+                [0, 2],
+                [1, 1],
+                [1, 2]
+            ]
+        };
+        let tmino = {
+            color: 6,
+            pos: [
+                [0, 1],
+                [1, 0],
+                [1, 1],
+                [1, 2]
+            ]
+        };
+        let imino = {
+            color: 7,
+            pos: [
+                [0, 1],
+                [1, 1],
+                [2, 1],
+                [3, 1]
+            ]
+        };
+
+        let allmino = [zmino, smino, lmino, jmino, omino, tmino, imino];
+
+        let nextmino = [zmino, smino, lmino, jmino, omino, tmino, imino];
+
+        let moveblock = {};
+
+        let holdMinoType = 0;
+
+        window.onload = function () {
+            createTable('tetris', 20, 10);
+            createTable('hold', 4, 4);
+            createTable('next', 20, 4);
+            // 移動キーイベント
+            document.addEventListener("keydown", keypress);
+            document.getElementById('start').addEventListener('click', start);
+            document.getElementById('stop').addEventListener('click', stop);
+        }
+
+        function keypress(event) {
+            console.log(event);
+            if (event.key === 'a') {
+                left();
+            }
+            if (event.key === 'd') {
+                right();
+            }
+            if (event.key === 's') {
+                down();
+            }
+            if (event.key === 'Enter') {
+                rotate();
+            }
+            if (event.key === 'Shift') {
+                holdMino();
+            }
+        }
+
+        function holdMino() {
+            // 画面上のminoをクリア
+            clear();
+            // 画面上のminoをholdに保存
+
+            // hold minoをholdに表示する
+            updateHold(moveblock);
+            // 画面上に次のminoをputする
+        }
+
+        function updateHold(mino) {
+            holdMinoType = mino.color;
+            const hmino = allmino[holdMinoType - 1]
+            for (let index = 0; index < hmino.pos.length; index++) {
+                let block = hmino.pos[index];
+                hold[block[0]][block[1]] = hmino.color;
+            }
+        }
+
+        function createTable(name, rowCount, colCount) {
+            // テトリス画面を作る
+            let tetris = window.document.getElementById(name);
+            for (let row = 0; row < rowCount; row++) {
+                let tr = window.document.createElement('tr');
+                tetris.appendChild(tr);
+                for (let col = 0; col < colCount; col++) {
+                    let td = window.document.createElement('td');
+                    // td.onclick = onClick;
+                    tr.appendChild(td);
+                }
+            }
+        }
+
+        function start() {
+            console.log('start');
+            document.getElementById('start').blur();
+            allClear();
+            put();
+            timer = setInterval(down, 1000);
+            let audio = document.getElementById('music');
+            audio.volume = 0.1;
+            audio.play();
+        }
+        function stop() {
+            console.log('stop');
+            clearInterval(timer);
+            let audio = document.getElementById('music');
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        function allClear() {
+            for (let i = 0; i < 20; i++) {
+                for (let j = 0; j < 10; j++) {
+                    screen[i][j] = 0;
+                }
+            }
+            redraw();
+        }
+
+        /**
+         * 一行削除する
+         */
+        function deleteLine(lineNumber) {
+            let line = screen[lineNumber];
+            for (let index = lineNumber - 1; index >= 0; index--) {
+                screen[index + 1] = screen[index];
+            }
+            screen[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            playDelete();
+        }
+
+        /**
+         * 一行揃っているかチェックする
+         */
+        function checkLine(lineNumber) {
+            let line = screen[lineNumber];
+            for (let index = 0; index < line.length; index++) {
+                const block = line[index];
+                if (block === 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function check() {
+            for (let index = 0; index < screen.length; index++) {
+                if (checkLine(index)) {
+                    deleteLine(index);
+                }
+            }
+        }
+
+        function minX(pos) {
+            let xlist = [];
+            for (let index = 0; index < pos.length; index++) {
+                xlist.push(pos[index][1])
+            }
+            return Math.min(...xlist);
+        }
+
+        function minY(pos) {
+            let ylist = [];
+            for (let index = 0; index < pos.length; index++) {
+                ylist.push(pos[index][0])
+            }
+            return Math.min(...ylist);
+        }
+
+        function maxY(pos) {
+            let ylist = [];
+            for (let index = 0; index < pos.length; index++) {
+                ylist.push(pos[index][0])
+            }
+            return Math.max(...ylist);
+        }
+
+        function getHeight(pos) {
+            let set = new Set();
+            for (let index = 0; index < pos.length; index++) {
+                set.add(pos[index][0]);
+            }
+            return set.size;
+        }
+
+        function rotate() {
+            clear();
+            let left = minX(moveblock.pos);
+            let top = minY(moveblock.pos);
+            let origin = [];
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                const block = moveblock.pos[index];
+                origin.push([block[0] - top, block[1] - left]);
+            }
+            let rote = [];
+            for (let index = 0; index < origin.length; index++) {
+                const orgBlock = origin[index];
+                rote.push([top + orgBlock[1], left + getHeight(origin) - orgBlock[0] - 1]);
+            }
+            moveblock.pos = rote;
+            update();
+            redraw();
+        }
+
+        function contains(source, target) {
+            for (let index = 0; index < source.length; index++) {
+                const block = source[index];
+                if (target[0] === block[0] && target[1] === block[1]) {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
+        function canMove() {
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                const block = moveblock.pos[index];
+                if (block[0] < 19) {
+                    let underblock = screen[block[0] + 1][block[1]];
+                    if (underblock !== 0 && !contains(moveblock.pos, [block[0] + 1, block[1]])) {
+                        return false;
+                    }
+                }
+
+            }
+            return true;
+        }
+
+        function canRightMove() {
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                const block = moveblock.pos[index];
+                if (block[1] < 9) {
+                    let rightblock = screen[block[0]][block[1] + 1];
+                    if (rightblock !== 0 && !contains(moveblock.pos, [block[0], block[1] + 1])) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function canLeftMove() {
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                const block = moveblock.pos[index];
+                if (block[1] > 0) {
+                    let leftblock = screen[block[0]][block[1] - 1];
+                    if (leftblock !== 0 && !contains(moveblock.pos, [block[0], block[1] - 1])) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function left() {
+            if (canLeftMove()) {
+                let newpos = [];
+                let pos = moveblock.pos;
+                for (let index = 0; index < pos.length; index++) {
+                    const block = pos[index];
+                    newpos.push([block[0], block[1] - 1]);
+                }
+                clear();
+                moveblock.pos = newpos;
+                update();
+                redraw();
+            }
+        }
+
+        function right() {
+            if (canRightMove()) {
+                let newpos = [];
+                let pos = moveblock.pos;
+                for (let index = 0; index < pos.length; index++) {
+                    const block = pos[index];
+                    newpos.push([block[0], block[1] + 1]);
+                }
+                clear();
+                moveblock.pos = newpos;
+                update();
+                redraw();
+            }
+        }
+
+        function put() {
+            if (nextmino.length === 0) {
+                nextmino = allmino.slice();
+            }
+            let index = getRandomInt(nextmino.length);
+            let mino = nextmino[index];
+            nextmino.splice(index, 1);
+            moveblock = { color: mino.color, pos: moveHolizon(mino.pos, 3) };
+            update();
+        }
+
+        function moveHolizon(pos, num) {
+            let result = []
+            for (let index = 0; index < pos.length; index++) {
+                const block = pos[index];
+                result.push([block[0], block[1] + num]);
+            }
+            return result;
+        }
+
+        function update() {
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                let block = moveblock.pos[index];
+                screen[block[0]][block[1]] = moveblock.color;
+            }
+        }
+
+        function clear() {
+            for (let index = 0; index < moveblock.pos.length; index++) {
+                const block = moveblock.pos[index];
+                screen[block[0]][block[1]] = 0;
+            }
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        function down() {
+            if (maxY(moveblock.pos) < 19 && canMove()) {
+                let newpos = [];
+                let pos = moveblock.pos;
+                for (let index = 0; index < pos.length; index++) {
+                    const block = pos[index];
+                    newpos.push([block[0] + 1, block[1]]);
+                }
+                clear();
+                moveblock.pos = newpos;
+                update();
+                redraw();
+            } else {
+                check();
+                playDown();
+                put();
+                redraw();
+            }
+        }
+
+        function redraw() {
+            for (let row = 0; row < 20; row++) {
+                for (let col = 0; col < 10; col++) {
+                    let block = screen[row][col];
+                    let table = document.getElementById('tetris');
+                    let tr = table.getElementsByTagName('tr')[row];
+                    let td = tr.getElementsByTagName('td')[col];
+                    if (block === 1) {
+                        td.style.backgroundColor = 'red'; // zmino
+                    } else if (block === 2) {
+                        td.style.backgroundColor = 'green'; // smino
+                    } else if (block === 3) {
+                        td.style.backgroundColor = 'blue'; // lmino
+                    } else if (block === 4) {
+                        td.style.backgroundColor = 'orange'; // jmino
+                    } else if (block === 5) {
+                        td.style.backgroundColor = 'yellow'; // omino
+                    } else if (block === 6) {
+                        td.style.backgroundColor = 'purple'; // tmino
+                    } else if (block === 7) {
+                        td.style.backgroundColor = 'skyblue'; // imino
+                    } else {
+                        td.style.backgroundColor = 'lightGray'
+                    }
+                }
+            }
+        }
+
+        function onClick(e) {
+            if (orenoTurn) {
+                e.target.innerHTML = '〇';
+                window.document.getElementsByTagName('h1')[0].innerHTML = '黒の番';
+                orenoTurn = false;
+            } else {
+                e.target.innerHTML = '●';
+                window.document.getElementsByTagName('h1')[0].innerHTML = '白の番';
+                orenoTurn = true;
+            }
+        }
+
+        function playDown() {
+            document.getElementById('down').play();
+        }
+
+        function playDelete() {
+            document.getElementById('delete').play();
+        }
+
+    </script>
+</head>
+
+<body>
+    <h1>My Tetris</h1>
+    <div class="contents">
+        <div class="hold">
+            <table id="hold">
+            </table>
+
+        </div>
+        <div class="stage">
+            <table id="tetris">
+            </table>
+
+            <button class='btn-real' id="start"><i class="fas fa-play-circle"></i></button>
+            <button class='btn-real' id="stop"><i class="far fa-stop-circle"></i></button>
+            <audio id="music" loop src="tetris.mp3"></audio>
+            <audio id="down" src="down.mp3"></audio>
+            <audio id="delete" src="delete.mp3"></audio>
+        </div>
+        <div class="next">
+            <table id="next"></table>
+        </div>
+    </div>
+</body>
+<footer>
+    <h4>My footer</h4>
+</footer>
+
+</html>
